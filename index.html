@@ -1,64 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Resizer Web App</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 40px; }
-    .container { max-width: 600px; margin: auto; }
-    button { padding: 10px 20px; margin-top: 20px; cursor: pointer; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delhivery App Icon Resizer</title>
+<style>
+body { font-family: Arial, sans-serif; padding:40px; background:#0d0d0d; color:#fff; text-align:center;}
+.container{max-width:650px;margin:auto;}
+#logo{max-width:220px;margin-bottom:20px;}
+button{padding:12px 26px;margin-top:20px;cursor:pointer;background:#1f1f1f;color:#fff;border:1px solid #444;border-radius:6px;}
+footer{margin-top:60px;opacity:0.7;}
+footer a{color:#4fa3ff;text-decoration:none;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Image Resizer Web App</h2>
-    <p>Upload a transparent PNG and download a ZIP containing resized versions.</p>
+<div class="container">
+<img id="logo" src="app-icon-resizer-logo.png" alt="Logo"/>
+<h2>Delhivery App Icon Resizer</h2>
+<p>Upload a transparent PNG and download a ZIP containing resized square and circular icon sets.</p>
+<input type="file" id="upload" accept="image/png" />
+<button id="processBtn">Generate ZIP</button>
 
-    <input type="file" id="upload" accept="image/png" />
-    <button id="processBtn">Generate ZIP</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script>
+const sizes = [(16, 16), (24, 24), (32, 32), (36, 36), (57, 57), (64, 64), (96, 96), (128, 128), (114, 114), (144, 144), (192, 192), (256, 256), (512, 512), (1024, 1024), (2048, 2048)];
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <script>
-      const sizes = [
-        { name: "small", width: 256, height: 256 },
-        { name: "medium", width: 512, height: 512 },
-        { name: "large", width: 1024, height: 1024 }
-      ];
+document.getElementById("processBtn").onclick = async () => {
+  const file = document.getElementById("upload").files[0];
+  if (!file) return alert("Please upload a PNG file first.");
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await img.decode();
+  const zip = new JSZip();
+  const square = zip.folder("square");
+  const circular = zip.folder("circular");
+  for (const s of sizes){
+    const [w,h]=s;
+    const canvas=document.createElement("canvas");
+    canvas.width=w; canvas.height=h;
+    const ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(img,0,0,w,h);
+    let dataURL=canvas.toDataURL("image/png");
+    let bstr=atob(dataURL.split(",")[1]);
+    let arr=new Uint8Array(bstr.length);
+    for(let i=0;i<bstr.length;i++)arr[i]=bstr.charCodeAt(i);
+    square.file(`Icon-square-${w}x${h}.png`,arr);
 
-      document.getElementById("processBtn").onclick = async () => {
-        const file = document.getElementById("upload").files[0];
-        if (!file) return alert("Please upload a PNG file first.");
+    const c2=document.createElement("canvas");
+    c2.width=w; c2.height=h;
+    const cctx=c2.getContext("2d");
+    cctx.clearRect(0,0,w,h);
+    cctx.beginPath();
+    cctx.arc(w/2,h/2,w/2,0,Math.PI*2);
+    cctx.closePath();
+    cctx.clip();
+    cctx.drawImage(img,0,0,w,h);
+    let cu=c2.toDataURL("image/png");
+    let bb=atob(cu.split(",")[1]);
+    let aa=new Uint8Array(bb.length);
+    for(let i=0;i<bb.length;i++)aa[i]=bb.charCodeAt(i);
+    circular.file(`Icon-circular-${w}x${h}.png`,aa);
+  }
+  const blob=await zip.generateAsync({type:"blob"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="generated-icons.zip";
+  link.click();
+};
+</script>
 
-        const img = new Image();
-        img.src = URL.createObjectURL(file);
-        await img.decode();
-
-        const zip = new JSZip();
-
-        for (const size of sizes) {
-          const canvas = document.createElement("canvas");
-          canvas.width = size.width;
-          canvas.height = size.height;
-          const ctx = canvas.getContext("2d");
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, size.width, size.height);
-
-          const dataURL = canvas.toDataURL("image/png");
-          const binary = atob(dataURL.split(",")[1]);
-          const array = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-
-          zip.file(`${size.name}_${size.width}x${size.height}.png`, array);
-        }
-
-        const blob = await zip.generateAsync({ type: "blob" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "resized_images.zip";
-        link.click();
-      };
-    </script>
-  </div>
+<footer><a href="https://www.orioncjose.com" target="_blank">Made by Orion</a></footer>
+</div>
 </body>
 </html>
