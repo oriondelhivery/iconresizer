@@ -1,76 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delhivery App Icon Resizer</title>
+<meta charset="UTF-8" />
+<title>App Icon Resizer</title>
 <style>
-body { font-family: Arial, sans-serif; padding:40px; background:#0d0d0d; color:#fff; text-align:center;}
-.container{max-width:650px;margin:auto;}
-#logo{max-width:220px;margin-bottom:20px;}
-button{padding:12px 26px;margin-top:20px;cursor:pointer;background:#1f1f1f;color:#fff;border:1px solid #444;border-radius:6px;}
-footer{margin-top:60px;opacity:0.7;}
-footer a{color:#4fa3ff;text-decoration:none;}
+body {
+    background: #0d0d0d;
+    color: #e5e5e5;
+    font-family: 'Inter', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+.container {
+    width: 100%;
+    max-width: 650px;
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+    text-align: center;
+}
+.logo {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+#dropzone {
+    padding: 30px;
+    border: 2px dashed #444;
+    border-radius: 14px;
+    background: #111;
+    cursor: pointer;
+    transition: 0.3s;
+}
+#dropzone.dragover {
+    border-color: #4da3ff;
+    background: #1a2736;
+}
+#dropzone p {
+    color: #aaa;
+    margin: 0;
+}
+button {
+    margin-top: 25px;
+    padding: 12px 25px;
+    background: #4da3ff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    color: black;
+    font-weight: 600;
+}
+button:hover {
+    background: #73b8ff;
+}
+.progress-container {
+    margin-top: 20px;
+    width: 100%;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 14px;
+    display: none;
+}
+.progress-bar {
+    height: 100%;
+    background: #4da3ff;
+    width: 0%;
+}
+footer {
+    margin-top: 40px;
+}
+a { color: #4da3ff; }
 </style>
 </head>
 <body>
+
 <div class="container">
-<img id="logo" src="app-icon-resizer-logo.png" alt="Logo"/>
-<h2>Delhivery App Icon Resizer</h2>
-<p>Upload a transparent PNG and download a ZIP containing resized square and circular icon sets.</p>
-<input type="file" id="upload" accept="image/png" />
-<button id="processBtn">Generate ZIP</button>
+    <img src="logo.png" class="logo" alt="Logo"/>
+    <h1>App Icon Resizer</h1>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-<script>
-const sizes = [(16, 16), (24, 24), (32, 32), (36, 36), (57, 57), (64, 64), (96, 96), (128, 128), (114, 114), (144, 144), (192, 192), (256, 256), (512, 512), (1024, 1024), (2048, 2048)];
+    <div id="dropzone">
+        <p>Drag & Drop PNG Here<br>or Click to Upload</p>
+    </div>
 
-document.getElementById("processBtn").onclick = async () => {
-  const file = document.getElementById("upload").files[0];
-  if (!file) return alert("Please upload a PNG file first.");
-  const img = new Image();
-  img.src = URL.createObjectURL(file);
-  await img.decode();
-  const zip = new JSZip();
-  const square = zip.folder("square");
-  const circular = zip.folder("circular");
-  for (const s of sizes){
-    const [w,h]=s;
-    const canvas=document.createElement("canvas");
-    canvas.width=w; canvas.height=h;
-    const ctx=canvas.getContext("2d");
-    ctx.clearRect(0,0,w,h);
-    ctx.drawImage(img,0,0,w,h);
-    let dataURL=canvas.toDataURL("image/png");
-    let bstr=atob(dataURL.split(",")[1]);
-    let arr=new Uint8Array(bstr.length);
-    for(let i=0;i<bstr.length;i++)arr[i]=bstr.charCodeAt(i);
-    square.file(`Icon-square-${w}x${h}.png`,arr);
+    <input type="file" id="upload" accept="image/png" style="display:none;">
+    <button onclick="process()">Generate ZIP</button>
 
-    const c2=document.createElement("canvas");
-    c2.width=w; c2.height=h;
-    const cctx=c2.getContext("2d");
-    cctx.clearRect(0,0,w,h);
-    cctx.beginPath();
-    cctx.arc(w/2,h/2,w/2,0,Math.PI*2);
-    cctx.closePath();
-    cctx.clip();
-    cctx.drawImage(img,0,0,w,h);
-    let cu=c2.toDataURL("image/png");
-    let bb=atob(cu.split(",")[1]);
-    let aa=new Uint8Array(bb.length);
-    for(let i=0;i<bb.length;i++)aa[i]=bb.charCodeAt(i);
-    circular.file(`Icon-circular-${w}x${h}.png`,aa);
-  }
-  const blob=await zip.generateAsync({type:"blob"});
-  const link=document.createElement("a");
-  link.href=URL.createObjectURL(blob);
-  link.download="generated-icons.zip";
-  link.click();
-};
-</script>
-
-<footer><a href="https://www.orioncjose.com" target="_blank">Made by Orion</a></footer>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
 </div>
+
+<footer>
+    <a href="https://www.orioncjose.com" target="_blank">made by Orion</a>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const sizes = [16,24,32,36,57,64,96,128,114,144,192,256,512,1024,2048];
+let selectedFile = null;
+
+const dropzone = document.getElementById("dropzone");
+const upload = document.getElementById("upload");
+const progressContainer = document.querySelector(".progress-container");
+const progressBar = document.getElementById("progressBar");
+
+// Drag & Drop Events
+dropzone.addEventListener("click", () => upload.click());
+dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+});
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    if (e.dataTransfer.files.length > 0) {
+        selectedFile = e.dataTransfer.files[0];
+        dropzone.querySelector("p").textContent = selectedFile.name;
+    }
+});
+upload.addEventListener("change", () => {
+    selectedFile = upload.files[0];
+    dropzone.querySelector("p").textContent = selectedFile.name;
+});
+
+function resizeImage(img, size, circular=false){
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    if(circular){
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+        ctx.clip();
+    }
+
+    ctx.drawImage(img, 0, 0, size, size);
+    return canvas.toDataURL('image/png');
+}
+
+async function process(){
+    if(!selectedFile){ alert("Upload a PNG first"); return; }
+
+    const img = new Image();
+    img.src = URL.createObjectURL(selectedFile);
+
+    img.onload = async () => {
+        const zip = new JSZip();
+        const square = zip.folder("square");
+        const circular = zip.folder("circular");
+
+        progressContainer.style.display = "block";
+
+        let count = 0;
+        const total = sizes.length * 2;
+
+        for(const s of sizes){
+            const sq = resizeImage(img, s).split(",")[1];
+            square.file(`Icon-square-${s}x${s}.png`, sq, {base64:true});
+            count++;
+            progressBar.style.width = ((count/total)*100) + "%";
+
+            const cir = resizeImage(img, s, true).split(",")[1];
+            circular.file(`Icon-circular-${s}x${s}.png`, cir, {base64:true});
+            count++;
+            progressBar.style.width = ((count/total)*100) + "%";
+        }
+
+        const blob = await zip.generateAsync({type:"blob"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "icons.zip";
+        a.click();
+
+        progressBar.style.width = "0%";
+        progressContainer.style.display = "none";
+    };
+}
+</script>
 </body>
 </html>
