@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Resizer Web App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    .container { max-width: 600px; margin: auto; }
+    button { padding: 10px 20px; margin-top: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Image Resizer Web App</h2>
+    <p>Upload a transparent PNG and download a ZIP containing resized versions.</p>
+
+    <input type="file" id="upload" accept="image/png" />
+    <button id="processBtn">Generate ZIP</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script>
+      const sizes = [
+        { name: "small", width: 256, height: 256 },
+        { name: "medium", width: 512, height: 512 },
+        { name: "large", width: 1024, height: 1024 }
+      ];
+
+      document.getElementById("processBtn").onclick = async () => {
+        const file = document.getElementById("upload").files[0];
+        if (!file) return alert("Please upload a PNG file first.");
+
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        await img.decode();
+
+        const zip = new JSZip();
+
+        for (const size of sizes) {
+          const canvas = document.createElement("canvas");
+          canvas.width = size.width;
+          canvas.height = size.height;
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, size.width, size.height);
+
+          const dataURL = canvas.toDataURL("image/png");
+          const binary = atob(dataURL.split(",")[1]);
+          const array = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+
+          zip.file(`${size.name}_${size.width}x${size.height}.png`, array);
+        }
+
+        const blob = await zip.generateAsync({ type: "blob" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "resized_images.zip";
+        link.click();
+      };
+    </script>
+  </div>
+</body>
+</html>
