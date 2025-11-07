@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Icon Resizer</title>
+<style>
+    body { background:#111; color:white; font-family:Arial; text-align:center; padding:40px; }
+    #dropzone { border:2px dashed #555; padding:40px; margin:20px auto; width:300px; }
+    button { padding:10px 20px; margin-top:20px; }
+</style>
+</head>
+<body>
+<h1>Icon Resizer</h1>
+<div id="dropzone">Drop image here or click to upload</div>
+<input type="file" id="fileInput" style="display:none" accept="image/*" />
+<button onclick="process()">Generate Icons</button>
+
+<script>
+const sizes = [16,24,32,36,57,64,96,128,114,144,192,256,512,1024,2048];
+
+let uploadedFile = null;
+
+document.getElementById('dropzone').onclick = () => {
+    document.getElementById('fileInput').click();
+};
+
+document.getElementById('fileInput').onchange = (e) => {
+    uploadedFile = e.target.files[0];
+};
+
+document.getElementById('dropzone').ondragover = (e)=>{
+    e.preventDefault();
+};
+document.getElementById('dropzone').ondrop = (e)=>{
+    e.preventDefault();
+    uploadedFile = e.dataTransfer.files[0];
+};
+
+async function process(){
+    if(!uploadedFile){ alert("Upload a file first"); return; }
+
+    const zip = new JSZip();
+    const img = await createImageBitmap(await uploadedFile.arrayBuffer());
+
+    const mask = await loadMask();
+    const circMask = await loadCircMask();
+
+    const squareFolder = zip.folder("square");
+    const circleFolder = zip.folder("circular");
+
+    for (const s of sizes) {
+        const sq = await applyMask(img, mask, s);
+        squareFolder.file(`Icon-square-${s}x${s}.png`, sq);
+
+        const ci = await applyMask(img, circMask, s);
+        circleFolder.file(`icon-circular-${s}x${s}.png`, ci);
+    }
+
+    const blob = await zip.generateAsync({type:"blob"});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "icons.zip";
+    a.click();
+}
+
+async function loadMask(){
+    const res = await fetch("mask.png");
+    return createImageBitmap(await res.arrayBuffer());
+}
+
+async function loadCircMask(){
+    const res = await fetch("circle-mask.png");
+    return createImageBitmap(await res.arrayBuffer());
+}
+
+async function applyMask(img, mask, size){
+    const c = document.createElement("canvas");
+    c.width = size; c.height = size;
+    const ctx = c.getContext("2d");
+
+    ctx.drawImage(img, 0, 0, size, size);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(mask, 0, 0, size, size);
+
+    return await new Promise(res=> c.toBlob(res));
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>
