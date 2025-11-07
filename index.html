@@ -1,192 +1,306 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>App Icon Resizer</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Icon Resizer — SVG Mask + Circular (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body {
-    background: #0d0d0d;
-    color: #e5e5e5;
-    font-family: 'Inter', Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-}
-.container {
-    width: 100%;
-    max-width: 650px;
-    background: #1a1a1a;
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 4px 25px rgba(0,0,0,0.5);
-    text-align: center;
-}
-.logo {
-    max-width: 200px;
-    margin-bottom: 20px;
-}
-h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-#dropzone {
-    padding: 30px;
-    border: 2px dashed #444;
-    border-radius: 14px;
-    background: #111;
-    cursor: pointer;
-    transition: 0.3s;
-}
-#dropzone.dragover {
-    border-color: #4da3ff;
-    background: #1a2736;
-}
-#dropzone p {
-    color: #aaa;
-    margin: 0;
-}
-button {
-    margin-top: 25px;
-    padding: 12px 25px;
-    background: #4da3ff;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    color: black;
-    font-weight: 600;
-}
-button:hover {
-    background: #73b8ff;
-}
-.progress-container {
-    margin-top: 20px;
-    width: 100%;
-    background: #333;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 14px;
-    display: none;
-}
-.progress-bar {
-    height: 100%;
-    background: #4da3ff;
-    width: 0%;
-}
-footer {
-    margin-top: 40px;
-}
-a { color: #4da3ff; }
+:root{--bg:#0b0e10;--card:#0f1416;--muted:#9aa6b2;--accent:#4da3ff;--glass: rgba(255,255,255,0.03);}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,#060709 0%, #0b0e10 100%);color:#e6eef6;display:flex;align-items:flex-start;justify-content:center;padding:28px;}
+.app{width:100%;max-width:1100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 10px 40px rgba(2,6,10,0.6);display:grid;grid-template-columns:320px 1fr;gap:20px;}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.logo{width:64px;height:64px;object-fit:contain;border-radius:8px;background:var(--glass);padding:8px}
+.title h1{margin:0;font-size:16px}
+.title .lead{color:var(--muted);font-size:13px;margin-top:6px}
+.sidebar{padding:12px;background:rgba(255,255,255,0.01);border-radius:10px}
+.controls{display:flex;flex-direction:column;gap:12px}
+#dropzone,#maskDrop{min-height:110px;border-radius:10px;border:2px dashed rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;padding:12px;background:#0b1113;cursor:pointer}
+#dropzone.dragover,#maskDrop.dragover{border-color:var(--accent);box-shadow:0 8px 30px rgba(77,163,255,0.06)}
+.small{font-size:13px;color:var(--muted)}
+.actions button{width:100%;padding:10px;border-radius:8px;border:0;background:var(--accent);color:#041018;font-weight:700;cursor:pointer}
+.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:8px;cursor:pointer}
+.sizes-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.size-chip{background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px}
+.size-chip button{background:transparent;border:0;color:#ff8b8b;cursor:pointer;font-weight:700}
+.preview-area{padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);min-height:380px}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.preview-card{background:#071018;padding:8px;border-radius:10px;text-align:center}
+.preview-card img{max-width:100%;height:auto;background:transparent;border-radius:8px}
+.preview-size{font-size:12px;color:var(--muted);margin-top:6px}
+.top-actions{display:flex;gap:8px;align-items:center}
+.progress{height:10px;background:#081016;border-radius:8px;overflow:hidden;margin-top:8px}
+.progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#73b8ff);transition:width .12s}
+.footer{grid-column:1/-1;text-align:center;margin-top:12px;color:var(--muted);font-size:13px}
+.footer a{color:var(--accent)}
+input[type="number"]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 </style>
 </head>
 <body>
-
-<div class="container">
-    <img src="logo.png" class="logo" alt="Logo"/>
-    <h1>App Icon Resizer</h1>
-
-    <div id="dropzone">
-        <p>Drag & Drop PNG Here<br>or Click to Upload</p>
+<div class="app" role="main">
+  <div>
+    <div class="header">
+      <img src="logo.png" class="logo" alt="logo">
+      <div class="title">
+        <h1>Icon Resizer — SVG Mask + Circular (Final)</h1>
+        <div class="lead">Square icons use <code>mask.svg</code>. Circular icons use a circular crop. Preview before download.</div>
+      </div>
     </div>
+    <div class="sidebar">
+      <div class="controls">
+        <div>
+          <label class="small">Mask (drop SVG here to replace)</label>
+          <div id="maskDrop"><div id="maskText" class="small">mask.svg — provided</div></div>
+          <input type="file" id="maskInput" accept=".svg" style="display:none">
+        </div>
 
-    <input type="file" id="upload" accept="image/png" style="display:none;">
-    <button onclick="process()">Generate ZIP</button>
+        <div>
+          <label class="small">Source image (drop any image)</label>
+          <div id="dropzone"><div id="dropText">Drop image here or click to select</div></div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none">
+        </div>
 
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+        <div>
+          <label class="small">Sizes</label>
+          <div style="display:flex;gap:8px">
+            <input id="newSize" type="number" placeholder="e.g. 180" min="1">
+            <button id="addSize" class="secondary">Add</button>
+          </div>
+          <div class="sizes-list" id="sizesList"></div>
+        </div>
+
+        <div class="top-actions">
+          <button id="previewBtn" class="secondary">Preview</button>
+          <button id="downloadBtn" class="actionsBtn">Generate ZIP</button>
+        </div>
+
+        <div class="progress"><i id="bar"></i></div>
+        <div id="meta" class="small" style="margin-top:6px">No file selected</div>
+      </div>
     </div>
+  </div>
+
+  <div>
+    <div class="preview-area">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Previews</strong> <span class="small" id="previewCount"></span></div>
+        <div class="small">Tip: click preview to regenerate before download</div>
+      </div>
+      <div class="preview-grid" id="previewGrid" style="margin-top:12px"></div>
+    </div>
+    <div class="footer"> <a href="https://www.orioncjose.com" target="_blank">made by Orion</a> </div>
+  </div>
 </div>
-
-<footer>
-    <a href="https://www.orioncjose.com" target="_blank">made by Orion</a>
-</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-const sizes = [16,24,32,36,57,64,96,128,114,144,192,256,512,1024,2048];
+const DEFAULT_SIZES = [16,24,32,36,57,64,96,128,114,144,192,256,512,1024,2048];
+let sizes = Array.from(DEFAULT_SIZES);
+const SIZES_KEY = 'icon_resizer_sizes_v1';
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const dropText = document.getElementById('dropText');
+const maskDrop = document.getElementById('maskDrop');
+const maskInput = document.getElementById('maskInput');
+const maskText = document.getElementById('maskText');
+const previewGrid = document.getElementById('previewGrid');
+const sizesList = document.getElementById('sizesList');
+const newSize = document.getElementById('newSize');
+const addSize = document.getElementById('addSize');
+const previewBtn = document.getElementById('previewBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const bar = document.getElementById('bar');
+const meta = document.getElementById('meta');
+const previewCount = document.getElementById('previewCount');
+
 let selectedFile = null;
+let maskTextContent = null; // svg text
+let maskName = 'mask.svg';
 
-const dropzone = document.getElementById("dropzone");
-const upload = document.getElementById("upload");
-const progressContainer = document.querySelector(".progress-container");
-const progressBar = document.getElementById("progressBar");
+function saveSizes(){ try{ localStorage.setItem(SIZES_KEY, JSON.stringify(sizes)); }catch(e){} }
+function loadSizes(){ try{ const v = localStorage.getItem(SIZES_KEY); if(v) sizes = JSON.parse(v); }catch(e){} }
 
-// Drag & Drop Events
-dropzone.addEventListener("click", () => upload.click());
-dropzone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropzone.classList.add("dragover");
-});
-dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
-dropzone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropzone.classList.remove("dragover");
-    if (e.dataTransfer.files.length > 0) {
-        selectedFile = e.dataTransfer.files[0];
-        dropzone.querySelector("p").textContent = selectedFile.name;
-    }
-});
-upload.addEventListener("change", () => {
-    selectedFile = upload.files[0];
-    dropzone.querySelector("p").textContent = selectedFile.name;
-});
-
-function resizeImage(img, size, circular=false){
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-
-    if(circular){
-        ctx.beginPath();
-        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-        ctx.clip();
-    }
-
-    ctx.drawImage(img, 0, 0, size, size);
-    return canvas.toDataURL('image/png');
+function renderSizesUI(){
+  sizesList.innerHTML = '';
+  sizes.sort((a,b)=>a-b).forEach(s=>{
+    const el = document.createElement('div'); el.className='size-chip';
+    el.innerHTML = `<span>${s}x${s}</span><button title="Remove" data-size="${s}">✕</button>`;
+    sizesList.appendChild(el);
+  });
 }
 
-async function process(){
-    if(!selectedFile){ alert("Upload a PNG first"); return; }
+sizesList.addEventListener('click', (e)=>{
+  if(e.target.tagName === 'BUTTON'){
+    const s = parseInt(e.target.getAttribute('data-size'));
+    sizes = sizes.filter(x=>x!==s);
+    saveSizes(); renderSizesUI();
+  }
+});
 
+addSize.addEventListener('click', ()=>{
+  const v = parseInt(newSize.value);
+  if(!v || v<1) return;
+  if(!sizes.includes(v)) sizes.push(v);
+  newSize.value=''; saveSizes(); renderSizesUI();
+});
+
+loadSizes(); renderSizesUI();
+
+dropzone.addEventListener('click', ()=> fileInput.click());
+dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e)=>{ e.preventDefault(); dropzone.classList.remove('dragover'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
+fileInput.addEventListener('change', ()=> { const f = fileInput.files && fileInput.files[0]; if(f) handleFile(f); });
+
+maskDrop.addEventListener('click', ()=> maskInput.click());
+maskDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); maskDrop.classList.add('dragover'); });
+maskDrop.addEventListener('dragleave', ()=> maskDrop.classList.remove('dragover'));
+maskDrop.addEventListener('drop', (e)=>{ e.preventDefault(); maskDrop.classList.remove('dragover'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleMaskFile(f); });
+maskInput.addEventListener('change', ()=> { const f = maskInput.files && maskInput.files[0]; if(f) handleMaskFile(f); });
+
+function handleMaskFile(file){
+  if(!file.name.toLowerCase().endsWith('.svg')){ alert('Please upload an SVG file as mask'); return; }
+  const reader = new FileReader();
+  reader.onload = ()=> { maskTextContent = reader.result; maskName = file.name; maskText.textContent = maskName; };
+  reader.readAsText(file);
+}
+
+function handleFile(file){
+  if(!file.type || !file.type.startsWith('image/')){ alert('Please upload an image'); return; }
+  selectedFile = file;
+  dropText.textContent = file.name + ' (' + Math.round(file.size/1024) + 'KB)';
+  meta.textContent = 'Ready — click Preview or Generate ZIP';
+}
+
+async function loadImageFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const url = URL.createObjectURL(file);
     const img = new Image();
-    img.src = URL.createObjectURL(selectedFile);
-
-    img.onload = async () => {
-        const zip = new JSZip();
-        const square = zip.folder("square");
-        const circular = zip.folder("circular");
-
-        progressContainer.style.display = "block";
-
-        let count = 0;
-        const total = sizes.length * 2;
-
-        for(const s of sizes){
-            const sq = resizeImage(img, s).split(",")[1];
-            square.file(`Icon-square-${s}x${s}.png`, sq, {base64:true});
-            count++;
-            progressBar.style.width = ((count/total)*100) + "%";
-
-            const cir = resizeImage(img, s, true).split(",")[1];
-            circular.file(`Icon-circular-${s}x${s}.png`, cir, {base64:true});
-            count++;
-            progressBar.style.width = ((count/total)*100) + "%";
-        }
-
-        const blob = await zip.generateAsync({type:"blob"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = "icons.zip";
-        a.click();
-
-        progressBar.style.width = "0%";
-        progressContainer.style.display = "none";
-    };
+    img.onload = ()=> { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = ()=> { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
+    img.src = url;
+  });
 }
+
+async function loadMaskText(){
+  if(maskTextContent) return maskTextContent;
+  try{
+    const res = await fetch('mask.svg');
+    if(!res.ok) throw new Error('mask.svg not found');
+    const txt = await res.text();
+    return txt;
+  }catch(e){
+    return null;
+  }
+}
+
+function drawImageCover(ctx, img, w, h){
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const ir = iw/ih, cr = w/h;
+  let sx=0, sy=0, sw=iw, sh=ih;
+  if(ir > cr){ sw = ih * cr; sx = (iw - sw)/2; } else { sh = iw / cr; sy = (ih - sh)/2; }
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+}
+
+async function renderSquareWithSvgMask(img, size, svgText){
+  // Ensure svg has width/height
+  let svg = svgText;
+  svg = svg.replace(/<svg([^>]*)>/, (m,attrs)=>{
+    if(/width=/.test(attrs) && /height=/.test(attrs)) return '<svg'+attrs+'>';
+    return `<svg${attrs} width="${size}" height="${size}">`;
+  });
+  const svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  const maskImg = new Image();
+  maskImg.src = svg64;
+  await new Promise((res,rej)=>{ maskImg.onload = res; maskImg.onerror = ()=> rej(new Error('Failed to load mask.svg as image')); });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+
+  // draw mask then source-in draw image
+  ctx.drawImage(maskImg, 0, 0, size, size);
+  ctx.globalCompositeOperation = 'source-in';
+  drawImageCover(ctx, img, size, size);
+  ctx.globalCompositeOperation = 'source-over';
+  return canvas.toDataURL('image/png');
+}
+
+function renderCircular(img, size){
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,size,size);
+  drawImageCover(ctx, img, size, size);
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.beginPath();
+  ctx.arc(size/2,size/2,Math.min(size,size)/2,0,Math.PI*2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  return canvas.toDataURL('image/png');
+}
+
+previewBtn.addEventListener('click', async ()=>{
+  if(!selectedFile){ alert('Select an image first'); return; }
+  previewGrid.innerHTML = '';
+  previewCount.textContent = '';
+  const img = await loadImageFromFile(selectedFile);
+  const svgText = await loadMaskText();
+  if(!svgText){ alert('mask.svg not found. Please upload a mask via the Mask box.'); return; }
+  previewCount.textContent = ` — ${sizes.length} sizes`;
+  let count=0, total = sizes.length * 2;
+  for(const s of sizes){
+    // square preview
+    const sqData = await renderSquareWithSvgMask(img, s, svgText);
+    const circData = renderCircular(img, s);
+    const card = document.createElement('div'); card.className='preview-card';
+    card.innerHTML = `<div style="display:flex;gap:8px;align-items:center;justify-content:center"><div><img src="${sqData}" alt="sq" style="width:96px;height:96px;border-radius:12px"></div><div><img src="${circData}" alt="circ" style="width:96px;height:96px;border-radius:50%"></div></div><div class="preview-size">${s}x${s}</div>`;
+    previewGrid.appendChild(card);
+    count+=2;
+    setProgress((count/total)*100);
+    await new Promise(r=>setTimeout(r,60));
+  }
+  setProgress(0);
+  meta.textContent = 'Preview ready';
+});
+
+downloadBtn.addEventListener('click', async ()=>{
+  if(!selectedFile){ alert('Select an image first'); return; }
+  const img = await loadImageFromFile(selectedFile);
+  const svgText = await loadMaskText();
+  if(!svgText){ alert('mask.svg not found. Please upload a mask via the Mask box.'); return; }
+  downloadBtn.disabled = true; downloadBtn.textContent='Processing...';
+  const zip = new JSZip();
+  const sq = zip.folder('square');
+  const circ = zip.folder('circular');
+  let count=0, total = sizes.length * 2;
+  for(const s of sizes){
+    const sqData = await renderSquareWithSvgMask(img, s, svgText);
+    sq.file(`Icon-square-${s}x${s}.png`, sqData.split(',')[1], {base64:true});
+    count++; setProgress((count/total)*100);
+    await new Promise(r=>setTimeout(r,40));
+    const circData = renderCircular(img, s);
+    circ.file(`Icon-circular-${s}x${s}.png`, circData.split(',')[1], {base64:true});
+    count++; setProgress((count/total)*100);
+    await new Promise(r=>setTimeout(r,40));
+  }
+  const blob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'icons-with-mask.zip';
+  a.click();
+  downloadBtn.disabled = false; downloadBtn.textContent='Generate ZIP';
+  meta.textContent = 'Done — ZIP downloaded';
+  setProgress(0);
+});
+
+function setProgress(p){ bar.style.width = Math.max(0,Math.min(100,p)) + '%'; }
+
 </script>
 </body>
 </html>

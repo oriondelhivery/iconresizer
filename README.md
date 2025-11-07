@@ -1,21 +1,21 @@
-# App Icon Resizer — Upgraded
+# Icon Resizer — SVG Mask + Circular (Final)
 
-This is a static client-side web app that generates square and circular transparent PNG icons
-from any uploaded PNG or JPG. It creates multiple predefined resolutions and zips them for download.
+This upgraded static client-side web app:
+- Uses your `mask.svg` to create square icons (mask applied as alpha mask).
+- Creates circular icons via circular crop.
+- Supports many image formats (browser-dependent).
+- Allows live swapping of the mask by drag-and-drop.
+- Shows previews before download.
+- Allows adding/removing sizes in the UI.
+- All processing happens in the browser.
 
-## How to use
-1. Upload (drag & drop or click) a PNG or JPG file (logo).
-2. Click **Generate ZIP**.
-3. A zip file will download containing two folders:
-   - `square/` with `Icon-square-WxH.png`
-   - `circular/` with `Icon-circular-WxH.png`
+How to use:
+1. Upload `index.html`, `mask.svg`, and `logo.png` to your GitHub repo root.
+2. Enable GitHub Pages (main branch, root).
+3. Open the site, drag a mask.svg into the Mask box if you want to replace the included mask.
+4. Drag any image into Source image box, click Preview to see outputs, then Generate ZIP.
 
-## Deploy to GitHub Pages
-1. Create a new repository.
-2. Upload `index.html` and `logo.png` (optional).
-3. Go to **Settings → Pages** and enable Pages from `main` branch (root).
-4. Visit the published URL.
+Notes:
+- For best results use a high-resolution source image.
+- Some image formats (TIFF/BMP) may not be supported by all browsers.
 
-## Notes
-- All processing happens in the browser (no uploads to server).
-- Supports PNG (transparent or not) and JPG/JPEG.
