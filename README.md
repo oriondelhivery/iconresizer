@@ -112,5 +112,5 @@ Design & development © 2025 — All rights reserved.
 
 ## 📄 License
 
-This project is released for **personal and commercial use** under the MIT License.  
-Attribution is appreciated but not required.
+This project is not released **personal and commercial use**  
+
