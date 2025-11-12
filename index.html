@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Icon Resizer — Platforms</title>
+  <link rel="shortcut icon" type="image/png" href="favicon-v2.png">
+  <link rel="icon" type="image/png" href="favicon-v2.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background:#0f1113; color:#fff; font-family: Inter, sans-serif; }
+    body.light { background:#fff; color:#111; }
+    .container { max-width:720px; margin:48px auto; padding:28px; }
+    #drop-area { background:#131416; padding:28px; border-radius:12px; cursor:pointer; text-align:center; }
+    body.light #drop-area { background:#f4f5f6; color:#111; }
+    .logo { display:block; margin:0 auto 18px auto; width:180px; }
+    .preview-container { display:flex; gap:16px; margin:18px 0; }
+    .preview-item p{ text-align:center; margin:8px 0 0 0; }
+    footer { margin-top:24px; text-align:center; color:gray; }
+    .theme-toggle { position: fixed; top: 12px; right: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="theme-toggle">
+      <span class="theme-label">🌙 Dark | Light ☀️</span>
+      <label class="switch">
+        <input type="checkbox" id="theme-switch">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <img id="main-logo" src="app-icon-resizer-logo-v3.png" class="logo" alt="Logo">
+    <h2 class="subtitle" style="text-align:center;">One-click solution for app icon resizing</h2>
+
+    <div id="drop-area">
+      <p id="drop-text">Drag & Drop or Click to Upload</p>
+      <input id="file-input" type="file" accept="image/*" style="display:none;">
+    </div>
+
+    <p class="sizes-label" style="margin-top:18px;">
+      The icons would be generated in these sizes — 16x16, 24x24, 32x32, 36x36, 57x57, 64x64, 96x96, 114x114, 128x128,
+      144x144, 192x192, 256x256, 512x512, 1024x1024, 2048x2048
+    </p>
+
+    <div class="preview-container">
+      <div class="preview-item">
+        <canvas id="square-preview" width="120" height="120"></canvas>
+        <p>Square</p>
+      </div>
+      <div class="preview-item">
+        <canvas id="circle-preview" width="120" height="120"></canvas>
+        <p>Circular</p>
+      </div>
+    </div>
+
+    <div class="platform-row" style="margin:12px 0;">
+      <label><input type="radio" name="platform" value="all" checked> All</label>
+      <label style="margin-left:12px;"><input type="radio" name="platform" value="ios"> iOS</label>
+      <label style="margin-left:12px;"><input type="radio" name="platform" value="android"> Android</label>
+    </div>
+
+    <div class="add-size-row" style="margin-bottom:16px;">
+      <input id="new-size" type="number" placeholder="Add size (e.g. 300)">
+      <button id="add-size-btn">Add</button>
+    </div>
+
+    <button id="generate-btn">Generate Zip</button>
+
+    <footer>Created by the Creative Team, Delhivery Bangalore</footer>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- App script -->
+  <script src="script_v128.js"></script>
+</body>
+</html>
